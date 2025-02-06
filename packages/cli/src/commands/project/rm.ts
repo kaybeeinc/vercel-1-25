@@ -3,13 +3,12 @@ import ms from 'ms';
 import type Client from '../../util/client';
 import { emoji, prependEmoji } from '../../util/emoji';
 import { isAPIError } from '../../util/errors-ts';
-import confirm from '../../util/input/confirm';
 import { getCommandName } from '../../util/pkg-name';
 import { ProjectRmTelemetryClient } from '../../util/telemetry/commands/project/rm';
 import output from '../../output-manager';
 import { parseArguments } from '../../util/get-args';
 import { getFlagsSpecification } from '../../util/get-flags-specification';
-import handleError from '../../util/handle-error';
+import { printError } from '../../util/error';
 import { removeSubcommand } from './command';
 
 const e = encodeURIComponent;
@@ -26,7 +25,7 @@ export default async function rm(client: Client, argv: string[]) {
   try {
     parsedArgs = parseArguments(argv, flagsSpecification);
   } catch (error) {
-    handleError(error);
+    printError(error);
     return 1;
   }
   const { args } = parsedArgs;
@@ -87,5 +86,8 @@ async function readConfirmation(
     )
   );
 
-  return await confirm(client, `${chalk.bold.red('Are you sure?')}`, false);
+  return await client.input.confirm(
+    `${chalk.bold.red('Are you sure?')}`,
+    false
+  );
 }

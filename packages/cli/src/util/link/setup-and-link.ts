@@ -14,8 +14,8 @@ import {
 } from '../projects/link';
 import createProject from '../projects/create-project';
 import type Client from '../client';
-import handleError from '../handle-error';
-import confirm from '../input/confirm';
+import { printError } from '../error';
+
 import toHumanPath from '../humanize-path';
 import { isDirectory } from '../config/global-path';
 import selectOrg from '../input/select-org';
@@ -84,8 +84,7 @@ export default async function setupAndLink(
 
   const shouldStartSetup =
     autoConfirm ||
-    (await confirm(
-      client,
+    (await client.input.confirm(
       `${setupMsg} ${chalk.cyan(`“${toHumanPath(path)}”`)}?`,
       true
     ));
@@ -225,7 +224,7 @@ export default async function setupAndLink(
       output.prettyError(err);
       return { status: 'error', exitCode: 1, reason: 'TOO_MANY_PROJECTS' };
     }
-    handleError(err);
+    printError(err);
 
     return { status: 'error', exitCode: 1 };
   }

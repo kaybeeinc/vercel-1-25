@@ -26,8 +26,8 @@ import { printDeploymentStatus } from '../../util/deploy/print-deployment-status
 import { isValidArchive } from '../../util/deploy/validate-archive-format';
 import purchaseDomainIfAvailable from '../../util/domains/purchase-domain-if-available';
 import { emoji, prependEmoji } from '../../util/emoji';
-import { handleError } from '../../util/error';
-import { SchemaValidationFailed } from '../../util/errors';
+import { printError } from '../../util/error';
+import { SchemaValidationFailed } from '../../util/errors-ts';
 import {
   AliasDomainConfigured,
   BuildError,
@@ -63,7 +63,7 @@ import validatePaths, {
   validateRootDirectory,
 } from '../../util/validate-paths';
 import { help } from '../help';
-import { deployCommand } from './command';
+import { deployCommand, deprecatedArchiveSplitTgz } from './command';
 import parseTarget from '../../util/parse-target';
 import { DeployTelemetryClient } from '../../util/telemetry/commands/deploy';
 import output from '../../output-manager';
@@ -113,7 +113,7 @@ export default async (client: Client): Promise<number> => {
       parsedArguments.flags['--yes'] = parsedArguments.flags['--confirm'];
     }
   } catch (error) {
-    handleError(error);
+    printError(error);
     return 1;
   }
 
@@ -215,10 +215,26 @@ export default async (client: Client): Promise<number> => {
     flags: parsedArguments.flags,
   });
 
-  const archive = parsedArguments.flags['--archive'];
-  if (typeof archive === 'string' && !isValidArchive(archive)) {
+  const parsedArchive = parsedArguments.flags['--archive'];
+  if (
+    typeof parsedArchive === 'string' &&
+    !(
+      isValidArchive(parsedArchive) ||
+      parsedArchive === deprecatedArchiveSplitTgz
+    )
+  ) {
     output.error(`Format must be one of: ${VALID_ARCHIVE_FORMATS.join(', ')}`);
     return 1;
+  }
+  if (parsedArchive === deprecatedArchiveSplitTgz) {
+    output.print(
+      `${prependEmoji(
+        `${param('--archive=tgz')} now has the same behavior as ${param(
+          '--archive=split-tgz'
+        )}. Please use ${param('--archive=tgz')} instead.`,
+        emoji('warning')
+      )}\n`
+    );
   }
 
   // Retrieve `project` and `org` from linked Project.
@@ -534,7 +550,7 @@ export default async (client: Client): Promise<number> => {
       createArgs,
       org,
       !project,
-      archive
+      parsedArchive ? 'tgz' : undefined
     );
 
     if (deployment instanceof NotDomainOwner) {
@@ -662,7 +678,7 @@ export default async (client: Client): Promise<number> => {
       return 1;
     }
 
-    handleError(err);
+    printError(err);
     return 1;
   }
 

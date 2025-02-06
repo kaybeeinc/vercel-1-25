@@ -3,13 +3,12 @@ import chalk from 'chalk';
 import table from '../../util/output/table';
 import getCommandFlags from '../../util/get-command-flags';
 import { getCommandName } from '../../util/pkg-name';
-import { NODE_VERSIONS } from '@vercel/build-utils';
 import { ProjectListTelemetryClient } from '../../util/telemetry/commands/project/list';
 import output from '../../output-manager';
 import { listSubcommand } from './command';
 import { parseArguments } from '../../util/get-args';
 import { getFlagsSpecification } from '../../util/get-flags-specification';
-import handleError from '../../util/handle-error';
+import { printError } from '../../util/error';
 import getScope from '../../util/get-scope';
 import type Client from '../../util/client';
 import type { Project } from '@vercel-internals/types';
@@ -29,7 +28,7 @@ export default async function list(
   try {
     parsedArgs = parseArguments(argv, flagsSpecification);
   } catch (error) {
-    handleError(error);
+    printError(error);
     return 1;
   }
   const { args, flags: opts } = parsedArgs;
@@ -76,28 +75,6 @@ export default async function list(
 
   const elapsed = ms(Date.now() - start);
 
-  if (deprecated) {
-    const upcomingDeprecationVersionsList = [];
-
-    for (const nodeVersion of NODE_VERSIONS) {
-      if (
-        nodeVersion.discontinueDate &&
-        nodeVersion.discontinueDate.valueOf() > Date.now()
-      ) {
-        upcomingDeprecationVersionsList.push(nodeVersion.range);
-      }
-    }
-
-    output.warn(
-      `The following Node.js versions will be deprecated soon: ${upcomingDeprecationVersionsList.join(
-        ', '
-      )}. Please upgrade your projects immediately.`
-    );
-    output.log(
-      'For more information visit: https://vercel.com/docs/functions/serverless-functions/runtimes/node-js#node.js-version'
-    );
-  }
-
   output.log(
     `${
       projectList.length > 0 ? 'Projects' : 'No projects'
@@ -109,14 +86,18 @@ export default async function list(
   if (projectList.length > 0) {
     const tablePrint = table(
       [
-        ['Project Name', 'Latest Production URL', 'Updated'].map(header =>
-          chalk.bold(chalk.cyan(header))
-        ),
+        [
+          'Project Name',
+          'Latest Production URL',
+          'Updated',
+          'Node Version',
+        ].map(header => chalk.bold(chalk.cyan(header))),
         ...projectList.flatMap(project => [
           [
             chalk.bold(project.name),
             getLatestProdUrl(project),
             chalk.gray(ms(Date.now() - project.updatedAt)),
+            project.nodeVersion ?? '',
           ],
         ]),
       ],

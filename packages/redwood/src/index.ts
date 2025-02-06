@@ -33,6 +33,7 @@ import {
   NodejsLambda,
   BuildV2,
   PrepareCache,
+  defaultCachePathGlob,
 } from '@vercel/build-utils';
 import { nodeFileTrace } from '@vercel/nft';
 import { getTransformedRoutes, Route } from '@vercel/routing-utils';
@@ -84,7 +85,6 @@ export const build: BuildV2 = async ({
     lockfileVersion,
     packageJsonPackageManager,
     turboSupportsCorepackHome,
-    detectedLockfile,
   } = await scanParentDirs(entrypointFsDirname, true);
 
   spawnOpts.env = getEnvForPackageManager({
@@ -94,7 +94,6 @@ export const build: BuildV2 = async ({
     nodeVersion,
     env: spawnOpts.env || {},
     turboSupportsCorepackHome,
-    detectedLockfile,
   });
 
   if (typeof installCommand === 'string') {
@@ -323,5 +322,5 @@ function hasScript(scriptName: string, pkg: PackageJson | null) {
 }
 
 export const prepareCache: PrepareCache = ({ repoRootPath, workPath }) => {
-  return glob('**/node_modules/**', repoRootPath || workPath);
+  return glob(defaultCachePathGlob, repoRootPath || workPath);
 };

@@ -1,5 +1,59 @@
 # @vercel/next
 
+## 4.5.1
+
+### Patch Changes
+
+- ensure non-locale prefixed route variants come after more specific ones ([#13003](https://github.com/vercel/vercel/pull/13003))
+
+## 4.5.0
+
+### Minor Changes
+
+- Add .yarn/cache to build cache ([#12961](https://github.com/vercel/vercel/pull/12961))
+
+## 4.4.5
+
+### Patch Changes
+
+- Add test case for locale false rewrite ([#12959](https://github.com/vercel/vercel/pull/12959))
+
+## 4.4.4
+
+### Patch Changes
+
+- flag behavior to defer defaultLocale rewrite ([#12941](https://github.com/vercel/vercel/pull/12941))
+
+## 4.4.3
+
+### Patch Changes
+
+- ensure defaultLocale rewrite doesn't conflict with user-defined redirects ([#12916](https://github.com/vercel/vercel/pull/12916))
+
+- Added headers for user-supplied rewrites ([#12847](https://github.com/vercel/vercel/pull/12847))
+
+## 4.4.2
+
+### Patch Changes
+
+- Upgrade @vercel/nft to 0.27.10 ([#12109](https://github.com/vercel/vercel/pull/12109))
+
+- Revert build utils refactor ([#12818](https://github.com/vercel/vercel/pull/12818))
+
+- Fix bug where when page doesn't postpone it still generates a correct fallback ([#12811](https://github.com/vercel/vercel/pull/12811))
+
+## 4.4.1
+
+### Patch Changes
+
+- Added root params support for pages powered by partial prerendering ([#12813](https://github.com/vercel/vercel/pull/12813))
+
+- Fix next data route replacing ([#12813](https://github.com/vercel/vercel/pull/12813))
+
+- Refactor build-util usage to reuse detected lockfile ([#12813](https://github.com/vercel/vercel/pull/12813))
+
+- add support for `images.qualities` ([#12813](https://github.com/vercel/vercel/pull/12813))
+
 ## 4.4.0
 
 ### Minor Changes

@@ -1,5 +1,23 @@
 # @vercel/hydrogen
 
+## 1.1.0
+
+### Minor Changes
+
+- Add .yarn/cache to build cache ([#12961](https://github.com/vercel/vercel/pull/12961))
+
+## 1.0.11
+
+### Patch Changes
+
+- Revert build utils refactor ([#12818](https://github.com/vercel/vercel/pull/12818))
+
+## 1.0.10
+
+### Patch Changes
+
+- Refactor build-util usage to reuse detected lockfile ([#12813](https://github.com/vercel/vercel/pull/12813))
+
 ## 1.0.9
 
 ### Patch Changes

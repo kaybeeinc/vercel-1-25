@@ -4,8 +4,7 @@ import type Client from '../../util/client';
 import { parseArguments } from '../../util/get-args';
 import { getFlagsSpecification } from '../../util/get-flags-specification';
 import getScope from '../../util/get-scope';
-import handleError from '../../util/handle-error';
-import confirm from '../../util/input/confirm';
+import { printError } from '../../util/error';
 import {
   disconnectResourceFromAllProjects,
   disconnectResourceFromProject,
@@ -36,7 +35,7 @@ export async function disconnect(client: Client) {
   try {
     parsedArguments = parseArguments(client.argv.slice(3), flagsSpecification);
   } catch (error) {
-    handleError(error);
+    printError(error);
     return 1;
   }
 
@@ -217,7 +216,7 @@ async function confirmDisconnectProject(
   output.log(
     `The resource ${chalk.bold(resource.name)} will be disconnected from project ${chalk.bold(project.name)}.`
   );
-  return confirm(client, `${chalk.red('Are you sure?')}`, false);
+  return client.input.confirm(`${chalk.red('Are you sure?')}`, false);
 }
 
 async function confirmDisconnectAllProjects(
@@ -231,5 +230,5 @@ async function confirmDisconnectAllProjects(
   for (const project of resource.projectsMetadata) {
     output.print(`  ${project.name}\n`);
   }
-  return confirm(client, chalk.red('Are you sure?'), false);
+  return client.input.confirm(chalk.red('Are you sure?'), false);
 }

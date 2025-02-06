@@ -37,6 +37,7 @@ import {
   scanParentDirs,
   cloneEnv,
   getInstalledPackageVersion,
+  defaultCachePathGlob,
 } from '@vercel/build-utils';
 import type { Route, RouteWithSrc } from '@vercel/routing-utils';
 import * as BuildOutputV1 from './utils/build-output-v1';
@@ -487,7 +488,6 @@ export const build: BuildV2 = async ({
       lockfileVersion,
       packageJsonPackageManager,
       turboSupportsCorepackHome,
-      detectedLockfile,
     } = await scanParentDirs(entrypointDir, true);
 
     spawnOpts.env = getEnvForPackageManager({
@@ -497,7 +497,6 @@ export const build: BuildV2 = async ({
       nodeVersion,
       env: spawnOpts.env || {},
       turboSupportsCorepackHome,
-      detectedLockfile,
     });
 
     if (meta.isDev) {
@@ -870,7 +869,11 @@ export const prepareCache: PrepareCache = async ({
   // Default cache files
   Object.assign(
     cacheFiles,
-    await glob('**/{.shadow-cljs,node_modules}/**', repoRootPath || workPath)
+    await glob(defaultCachePathGlob, repoRootPath || workPath)
+  );
+  Object.assign(
+    cacheFiles,
+    await glob('**/.shadow-cljs/**', repoRootPath || workPath)
   );
 
   // Framework cache files

@@ -6,7 +6,6 @@ import getDomainPrice from '../../util/domains/get-domain-price';
 import getDomainStatus from '../../util/domains/get-domain-status';
 import getScope from '../../util/get-scope';
 import param from '../../util/output/param';
-import confirm from '../../util/input/confirm';
 import purchaseDomain from '../../util/domains/purchase-domain';
 import stamp from '../../util/output/stamp';
 import { getCommandName } from '../../util/pkg-name';
@@ -16,7 +15,7 @@ import type Client from '../../util/client';
 import { buySubcommand } from './command';
 import { parseArguments } from '../../util/get-args';
 import { getFlagsSpecification } from '../../util/get-flags-specification';
-import handleError from '../../util/handle-error';
+import { printError } from '../../util/error';
 
 export default async function buy(client: Client, argv: string[]) {
   const telemetry = new DomainsBuyTelemetryClient({
@@ -30,7 +29,7 @@ export default async function buy(client: Client, argv: string[]) {
   try {
     parsedArgs = parseArguments(argv, flagsSpecification);
   } catch (error) {
-    handleError(error);
+    printError(error);
     return 1;
   }
   const { args } = parsedArgs;
@@ -97,8 +96,7 @@ export default async function buy(client: Client, argv: string[]) {
     autoRenew = true;
   } else {
     if (
-      !(await confirm(
-        client,
+      !(await client.input.confirm(
         `Buy now for ${chalk.bold(`$${price}`)} (${`${period}yr${
           period > 1 ? 's' : ''
         }`})?`,
@@ -108,8 +106,7 @@ export default async function buy(client: Client, argv: string[]) {
       return 0;
     }
 
-    autoRenew = await confirm(
-      client,
+    autoRenew = await client.input.confirm(
       renewalPrice.period === 1
         ? `Auto renew yearly for ${chalk.bold(`$${price}`)}?`
         : `Auto renew every ${renewalPrice.period} years for ${chalk.bold(

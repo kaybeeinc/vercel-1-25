@@ -5,8 +5,7 @@ import type Client from '../../util/client';
 import { parseArguments } from '../../util/get-args';
 import { getFlagsSpecification } from '../../util/get-flags-specification';
 import getScope from '../../util/get-scope';
-import handleError from '../../util/handle-error';
-import confirm from '../../util/input/confirm';
+import { printError } from '../../util/error';
 import { getFirstConfiguration } from '../../util/integration/fetch-marketplace-integrations';
 import { removeIntegration } from '../../util/integration/remove-integration';
 import { removeSubcommand } from './command';
@@ -25,7 +24,7 @@ export async function remove(client: Client) {
   try {
     parsedArguments = parseArguments(client.argv.slice(3), flagsSpecification);
   } catch (error) {
-    handleError(error);
+    printError(error);
     return 1;
   }
 
@@ -102,5 +101,5 @@ async function confirmIntegrationRemoval(
   output.log(
     `The ${chalk.bold(integration)} integration will be removed permanently from team ${chalk.bold(team.name)}.`
   );
-  return confirm(client, `${chalk.red('Are you sure?')}`, false);
+  return client.input.confirm(`${chalk.red('Are you sure?')}`, false);
 }

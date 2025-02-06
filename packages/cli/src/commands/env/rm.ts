@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import confirm from '../../util/input/confirm';
 import removeEnvRecord from '../../util/env/remove-env-record';
 import getEnvRecords from '../../util/env/get-env-records';
 import formatEnvironments from '../../util/env/format-environments';
@@ -17,7 +16,7 @@ import output from '../../output-manager';
 import { removeSubcommand } from './command';
 import { parseArguments } from '../../util/get-args';
 import { getFlagsSpecification } from '../../util/get-flags-specification';
-import handleError from '../../util/handle-error';
+import { printError } from '../../util/error';
 import { getLinkedProject } from '../../util/projects/link';
 
 export default async function rm(client: Client, argv: string[]) {
@@ -32,7 +31,7 @@ export default async function rm(client: Client, argv: string[]) {
   try {
     parsedArgs = parseArguments(argv, flagsSpecification);
   } catch (err) {
-    handleError(err);
+    printError(err);
     return 1;
   }
   const { args, flags: opts } = parsedArgs;
@@ -109,8 +108,7 @@ export default async function rm(client: Client, argv: string[]) {
   const skipConfirmation = opts['--yes'];
   if (
     !skipConfirmation &&
-    !(await confirm(
-      client,
+    !(await client.input.confirm(
       `Removing Environment Variable ${param(env.key)} from ${formatEnvironments(
         link,
         env,

@@ -1,5 +1,69 @@
 # @vercel/node
 
+## 5.1.2
+
+### Patch Changes
+
+- Updated dependencies [[`5c404c56702ff8685628ffe0db8a90e8cb87568a`](https://github.com/vercel/vercel/commit/5c404c56702ff8685628ffe0db8a90e8cb87568a)]:
+  - @vercel/build-utils@9.2.1
+
+## 5.1.1
+
+### Patch Changes
+
+- better path-to-regexp diff logging ([#12962](https://github.com/vercel/vercel/pull/12962))
+
+## 5.1.0
+
+### Minor Changes
+
+- Add .yarn/cache to build cache ([#12961](https://github.com/vercel/vercel/pull/12961))
+
+### Patch Changes
+
+- Updated dependencies [[`5c696af2b40f0fc368e84cafa6d82b2ce998fc19`](https://github.com/vercel/vercel/commit/5c696af2b40f0fc368e84cafa6d82b2ce998fc19)]:
+  - @vercel/build-utils@9.2.0
+
+## 5.0.5
+
+### Patch Changes
+
+- Updated dependencies [[`b52b7e3a8cd775d56149683cb809b7ad9c77a514`](https://github.com/vercel/vercel/commit/b52b7e3a8cd775d56149683cb809b7ad9c77a514)]:
+  - @vercel/build-utils@9.1.1
+
+## 5.0.4
+
+### Patch Changes
+
+- log diff between current and updated versions of path-to-regexp ([#12926](https://github.com/vercel/vercel/pull/12926))
+
+## 5.0.3
+
+### Patch Changes
+
+- Fix requests failing due to the presence of `Transfer-Encoding` header in edge-function dev server. ([#10701](https://github.com/vercel/vercel/pull/10701))
+
+- Split `build()`, `prepareCache()` and `startDevServer()` into separate files ([#12872](https://github.com/vercel/vercel/pull/12872))
+
+- Updated dependencies [[`745404610a836fa6c2068c5c192d2f3e8b86918f`](https://github.com/vercel/vercel/commit/745404610a836fa6c2068c5c192d2f3e8b86918f), [`3a5507fd1459c77b4491f1c9c3a64ad42e4ff009`](https://github.com/vercel/vercel/commit/3a5507fd1459c77b4491f1c9c3a64ad42e4ff009)]:
+  - @vercel/build-utils@9.1.0
+
+## 5.0.2
+
+### Patch Changes
+
+- Upgrade @vercel/nft to 0.27.10 ([#12109](https://github.com/vercel/vercel/pull/12109))
+
+- Updated dependencies [[`e570a1660c2b18a41d8c3985e645a175a44a5ea4`](https://github.com/vercel/vercel/commit/e570a1660c2b18a41d8c3985e645a175a44a5ea4)]:
+  - @vercel/build-utils@9.0.1
+
+## 5.0.1
+
+### Patch Changes
+
+- Updated dependencies [[`e6b0343585cc3cdf02467fd3264b1f57b2ffb0da`](https://github.com/vercel/vercel/commit/e6b0343585cc3cdf02467fd3264b1f57b2ffb0da), [`e6b0343585cc3cdf02467fd3264b1f57b2ffb0da`](https://github.com/vercel/vercel/commit/e6b0343585cc3cdf02467fd3264b1f57b2ffb0da), [`e6b0343585cc3cdf02467fd3264b1f57b2ffb0da`](https://github.com/vercel/vercel/commit/e6b0343585cc3cdf02467fd3264b1f57b2ffb0da)]:
+  - @vercel/build-utils@9.0.0
+
 ## 5.0.0
 
 ### Major Changes

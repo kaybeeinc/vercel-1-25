@@ -62,6 +62,10 @@ export const MAX_UNCOMPRESSED_LAMBDA_SIZE = !isNaN(
   ? Number(process.env.MAX_UNCOMPRESSED_LAMBDA_SIZE)
   : DEFAULT_MAX_UNCOMPRESSED_LAMBDA_SIZE;
 
+const skipDefaultLocaleRewrite = Boolean(
+  process.env.NEXT_EXPERIMENTAL_DEFER_DEFAULT_LOCALE_REWRITE
+);
+
 // Identify /[param]/ in route string
 // eslint-disable-next-line no-useless-escape
 const TEST_DYNAMIC_ROUTE = /\/\[[^\/]+?\](?=\/|$)/;
@@ -259,6 +263,10 @@ type RoutesManifestOld = {
     prefetchHeader?: string;
     didPostponeHeader?: string;
     contentTypeHeader: string;
+  };
+  rewriteHeaders?: {
+    pathHeader: string;
+    queryHeader: string;
   };
   skipMiddlewareUrlNormalize?: boolean;
   /**
@@ -550,11 +558,15 @@ export function localizeDynamicRoutes(
   isCorrectLocaleAPIRoutes?: boolean,
   inversedAppPathRoutesManifest?: Record<string, string>
 ): RouteWithSrc[] {
-  return dynamicRoutes.map((route: RouteWithSrc) => {
-    // i18n is already handled for middleware
-    if (route.middleware !== undefined || route.middlewarePath !== undefined)
-      return route;
+  const finalDynamicRoutes: RouteWithSrc[] = [];
+  const nonLocalePrefixedRoutes: RouteWithSrc[] = [];
 
+  for (const route of dynamicRoutes as RouteWithSrc[]) {
+    // i18n is already handled for middleware
+    if (route.middleware !== undefined || route.middlewarePath !== undefined) {
+      finalDynamicRoutes.push(route);
+      continue;
+    }
     const { i18n } = routesManifest || {};
 
     if (i18n) {
@@ -573,11 +585,31 @@ export function localizeDynamicRoutes(
       const isLocalePrefixed =
         isFallback || isBlocking || isAutoExport || isServerMode;
 
+      // when locale detection is disabled we don't add the default locale
+      // to the path while resolving routes so we need to be able to match
+      // without it being present
+      if (
+        skipDefaultLocaleRewrite &&
+        isLocalePrefixed &&
+        routesManifest?.i18n?.localeDetection === false
+      ) {
+        const nonLocalePrefixedRoute = JSON.parse(JSON.stringify(route));
+        nonLocalePrefixedRoute.src = nonLocalePrefixedRoute.src.replace(
+          '^',
+          `^${dynamicPrefix || ''}[/]?`
+        );
+        nonLocalePrefixedRoutes.push(nonLocalePrefixedRoute);
+      }
+
       route.src = route.src.replace(
         '^',
         `^${dynamicPrefix ? `${dynamicPrefix}[/]?` : '[/]?'}(?${
           isLocalePrefixed ? '<nextLocale>' : ':'
-        }${i18n.locales.map(locale => escapeStringRegexp(locale)).join('|')})?`
+        }${i18n.locales.map(locale => escapeStringRegexp(locale)).join('|')})${
+          // the locale is not optional on this path with the skip default
+          // locale rewrite flag otherwise can cause double slash in dest
+          skipDefaultLocaleRewrite ? '' : '?'
+        }`
       );
 
       if (
@@ -595,8 +627,14 @@ export function localizeDynamicRoutes(
     } else {
       route.src = route.src.replace('^', `^${dynamicPrefix}`);
     }
-    return route;
-  });
+    finalDynamicRoutes.push(route);
+  }
+
+  if (nonLocalePrefixedRoutes.length > 0) {
+    finalDynamicRoutes.push(...nonLocalePrefixedRoutes);
+  }
+
+  return finalDynamicRoutes;
 }
 
 type LoaderKey = 'imgix' | 'cloudinary' | 'akamai' | 'default';
@@ -2243,12 +2281,14 @@ export const onPrerenderRoute =
     // If enabled, try to get the postponed route information from the file
     // system and use it to assemble the prerender.
     let postponedPrerender: string | undefined;
+    let didPostpone = false;
     if (renderingMode === RenderingMode.PARTIALLY_STATIC && appDir) {
       const htmlPath = path.join(appDir, `${routeFileNoExt}.html`);
       const metaPath = path.join(appDir, `${routeFileNoExt}.meta`);
       if (fs.existsSync(htmlPath) && fs.existsSync(metaPath)) {
         const meta = JSON.parse(await fs.readFile(metaPath, 'utf8'));
         if ('postponed' in meta && typeof meta.postponed === 'string') {
+          didPostpone = true;
           postponedPrerender = meta.postponed;
 
           // Assign the headers Content-Type header to the prerendered type.
@@ -2259,6 +2299,14 @@ export const onPrerenderRoute =
           // Read the HTML file and append it to the prerendered content.
           const html = await fs.readFileSync(htmlPath, 'utf8');
           postponedPrerender += html;
+        } else {
+          // Set the content type to text/html; charset=utf-8.
+          initialHeaders ??= {};
+          initialHeaders['content-type'] = 'text/html; charset=utf-8';
+
+          // Read the HTML file and set it to the prerendered content.
+          const html = await fs.readFileSync(htmlPath, 'utf8');
+          postponedPrerender = html;
         }
       }
 
@@ -2698,7 +2746,7 @@ export const onPrerenderRoute =
                         'content-type': rscContentTypeHeader,
                       }
                     : {}),
-                  ...(postponedPrerender && rscDidPostponeHeader && !isFallback
+                  ...(didPostpone && rscDidPostponeHeader && !isFallback
                     ? { [rscDidPostponeHeader]: '1' }
                     : {}),
                 },

@@ -7,7 +7,6 @@ import isRootDomain from '../../util/is-root-domain';
 import param from '../../util/output/param';
 import getDomainAliases from '../../util/alias/get-domain-aliases';
 import getDomainByName from '../../util/domains/get-domain-by-name';
-import confirm from '../../util/input/confirm';
 import getTeams from '../../util/teams/get-teams';
 import { getCommandName } from '../../util/pkg-name';
 import output from '../../output-manager';
@@ -15,7 +14,7 @@ import { DomainsMoveTelemetryClient } from '../../util/telemetry/commands/domain
 import { moveSubcommand } from './command';
 import { parseArguments } from '../../util/get-args';
 import { getFlagsSpecification } from '../../util/get-flags-specification';
-import handleError from '../../util/handle-error';
+import { printError } from '../../util/error';
 import type Client from '../../util/client';
 import type { User, Team } from '@vercel-internals/types';
 
@@ -31,7 +30,7 @@ export default async function move(client: Client, argv: string[]) {
   try {
     parsedArgs = parseArguments(argv, flagsSpecification);
   } catch (error) {
-    handleError(error);
+    printError(error);
     return 1;
   }
   const { args, flags: opts } = parsedArgs;
@@ -82,8 +81,7 @@ export default async function move(client: Client, argv: string[]) {
         )} will have 24 hours to accept your move request before it expires.`
     );
     if (
-      !(await confirm(
-        client,
+      !(await client.input.confirm(
         `Are you sure you want to move ${param(domainName)} to ${param(
           destination
         )}?`,
@@ -104,8 +102,7 @@ export default async function move(client: Client, argv: string[]) {
         )} will be removed. Run ${getCommandName(`alias ls`)} to list them.`
       );
       if (
-        !(await confirm(
-          client,
+        !(await client.input.confirm(
           `Are you sure you want to move ${param(domainName)}?`,
           false
         ))

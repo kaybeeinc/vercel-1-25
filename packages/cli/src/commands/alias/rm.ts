@@ -5,7 +5,6 @@ import type Client from '../../util/client';
 import getScope from '../../util/get-scope';
 import removeAliasById from '../../util/alias/remove-alias-by-id';
 import stamp from '../../util/output/stamp';
-import confirm from '../../util/input/confirm';
 import findAliasByAliasOrId from '../../util/alias/find-alias-by-alias-or-id';
 import { isValidName } from '../../util/is-valid-name';
 import { getCommandName } from '../../util/pkg-name';
@@ -14,7 +13,7 @@ import output from '../../output-manager';
 import type { Alias } from '@vercel-internals/types';
 import { parseArguments } from '../../util/get-args';
 import { getFlagsSpecification } from '../../util/get-flags-specification';
-import { handleError } from '../../util/error';
+import { printError } from '../../util/error';
 import { removeSubcommand } from './command';
 
 export default async function rm(client: Client, argv: string[]) {
@@ -25,7 +24,7 @@ export default async function rm(client: Client, argv: string[]) {
   try {
     parsedArguments = parseArguments(argv, flagsSpecification);
   } catch (err) {
-    handleError(err);
+    printError(err);
     return 1;
   }
 
@@ -100,5 +99,5 @@ async function confirmAliasRemove(client: Client, alias: Alias) {
 
   output.log('The following alias will be removed permanently');
   output.print(`  ${tbl}\n`);
-  return confirm(client, chalk.red('Are you sure?'), false);
+  return client.input.confirm(chalk.red('Are you sure?'), false);
 }
